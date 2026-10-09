@@ -1,0 +1,754 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships       BusinessMember[]
+  documentsUploaded Document[]
+  conversations     Conversation[]
+  agentTasks        AgentTask[]
+
+  approvalsRequested Approval[]     @relation("ApprovalRequestedBy")
+  approvalsReviewed  Approval[]     @relation("ApprovalReviewedBy")
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+}
+
+model Business {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships    BusinessMember[]
+  customers      Customer[]
+  suppliers      Supplier[]
+  products       Product[]
+  taxProfiles    TaxProfile[]
+  documents      Document[]
+  invoices       Invoice[]
+  expenses       Expense[]
+  purchaseOrders PurchaseOrder[]
+  inventoryItems InventoryItem[]
+  conversations  Conversation[]
+  agentTasks     AgentTask[]
+  approvals      Approval[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     BusinessMember[]
+  permissions Permission[]
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles Role[]
+}
+
+model BusinessMember {
+  id         String   @id @default(uuid())
+  userId     String
+  businessId String
+  roleId     String
+  joinedAt   DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  role     Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, businessId])
+  @@index([businessId])
+  @@index([userId])
+}
+
+model Customer {
+  id         String @id @default(uuid())
+  businessId String
+
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  taxNumber String?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
+
+  @@index([businessId])
+  @@index([email])
+  @@index([taxNumber])
+}
+
+model Supplier {
+  id         String @id @default(uuid())
+  businessId String
+
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  taxNumber String?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business       Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoices       Invoice[]
+  purchaseOrders PurchaseOrder[]
+  expenses       Expense[]
+
+  @@index([businessId])
+  @@index([email])
+  @@index([taxNumber])
+}
+
+model Product {
+  id         String @id @default(uuid())
+  businessId String
+
+  name         String
+  sku          String
+  description  String?
+  unit         String
+  unitPrice    Decimal  @db.Decimal(12, 2)
+  costPrice    Decimal? @db.Decimal(12, 2)
+  reorderLevel Decimal? @db.Decimal(12, 2)
+  isActive     Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business           Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  inventoryItem      InventoryItem?
+  invoiceItems       InvoiceItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@unique([businessId, sku])
+  @@index([businessId])
+  @@index([name])
+}
+
+model TaxProfile {
+  id         String @id @default(uuid())
+  businessId String
+
+  name        String
+  code        String
+  rate        Decimal @db.Decimal(5, 2)
+  description String?
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoiceItems InvoiceItem[]
+
+  @@unique([businessId, code])
+  @@index([businessId])
+}
+
+enum DocumentType {
+  INVOICE
+  RECEIPT
+  PURCHASE_ORDER
+  QUOTATION
+  OTHER
+}
+
+enum ProcessingStatus {
+  UPLOADED
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+enum ReviewStatus {
+  PENDING
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+enum InvoiceType {
+  SALES
+  PURCHASE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  FINAL
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  UPI
+  OTHER
+}
+
+enum ExpenseStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  SENT
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum StockMovementType {
+  PURCHASE
+  SALE
+  RETURN_IN
+  RETURN_OUT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+enum InventoryStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum NotificationType {
+  APPROVAL_REQUIRED
+  APPROVAL_APPROVED
+  APPROVAL_REJECTED
+  LOW_STOCK
+  PAYMENT_OVERDUE
+  DOCUMENT_PROCESSED
+  DOCUMENT_FAILED
+  AGENT_TASK_COMPLETED
+  SYSTEM
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+  APPROVE
+  REJECT
+  LOGIN
+  LOGOUT
+  UPLOAD
+  DOWNLOAD
+  PROCESS
+  EXECUTE
+}
+
+model AuditLog {
+  id         String  @id @default(uuid())
+  businessId String
+  userId     String?
+
+  action     AuditAction
+  entityType String
+  entityId   String?
+
+  description String?
+
+  oldData  Json?
+  newData  Json?
+  metadata Json?
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id         String @id @default(uuid())
+  businessId String
+  userId     String
+
+  type    NotificationType
+  title   String
+  message String
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  referenceType String?
+  referenceId   String?
+
+  createdAt DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+  @@index([referenceType, referenceId])
+}
+
+model Approval {
+  id          String @id @default(uuid())
+  businessId  String
+  agentTaskId String
+
+  requestedById String
+  reviewedById  String?
+
+  actionType  String
+  description String
+
+  status ApprovalStatus @default(PENDING)
+
+  requestedAt DateTime  @default(now())
+  reviewedAt  DateTime?
+
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  agentTask   AgentTask @relation(fields: [agentTaskId], references: [id], onDelete: Cascade)
+  requestedBy User      @relation("ApprovalRequestedBy", fields: [requestedById], references: [id], onDelete: Restrict)
+  reviewedBy  User?     @relation("ApprovalReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+  @@index([agentTaskId])
+  @@index([requestedById])
+  @@index([reviewedById])
+  @@index([status])
+  @@index([requestedAt])
+}
+
+model InventoryItem {
+  id         String @id @default(uuid())
+  businessId String
+  productId  String @unique
+
+  quantity     Decimal @default(0) @db.Decimal(12, 3)
+  reservedQty  Decimal @default(0) @db.Decimal(12, 3)
+  reorderLevel Decimal @default(0) @db.Decimal(12, 3)
+
+  status InventoryStatus @default(OUT_OF_STOCK)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  movements StockMovement[]
+
+  @@unique([businessId, productId])
+  @@index([businessId])
+  @@index([productId])
+  @@index([status])
+}
+
+model StockMovement {
+  id              String @id @default(uuid())
+  inventoryItemId String
+
+  type     StockMovementType
+  quantity Decimal           @db.Decimal(12, 3)
+
+  referenceType String?
+  referenceId   String?
+  notes         String?
+
+  createdAt DateTime @default(now())
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+  @@index([inventoryItemId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([referenceType, referenceId])
+}
+
+model PurchaseOrder {
+  id         String @id @default(uuid())
+  businessId String
+  supplierId String
+
+  poNumber     String
+  orderDate    DateTime
+  expectedDate DateTime?
+
+  currency    String  @default("INR")
+  subtotal    Decimal @db.Decimal(12, 2)
+  taxAmount   Decimal @default(0) @db.Decimal(12, 2)
+  totalAmount Decimal @db.Decimal(12, 2)
+
+  status PurchaseOrderStatus @default(DRAFT)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+
+  items PurchaseOrderItem[]
+
+  @@unique([businessId, poNumber])
+  @@index([businessId])
+  @@index([supplierId])
+  @@index([orderDate])
+  @@index([expectedDate])
+  @@index([status])
+}
+
+model PurchaseOrderItem {
+  id              String  @id @default(uuid())
+  purchaseOrderId String
+  productId       String?
+
+  description String
+  quantity    Decimal @db.Decimal(12, 3)
+  unitPrice   Decimal @db.Decimal(12, 2)
+  taxAmount   Decimal @default(0) @db.Decimal(12, 2)
+  lineTotal   Decimal @db.Decimal(12, 2)
+
+  receivedQuantity Decimal @default(0) @db.Decimal(12, 3)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product       Product?      @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+}
+
+model Expense {
+  id         String  @id @default(uuid())
+  businessId String
+  supplierId String?
+  documentId String? @unique
+
+  description String
+  category    String
+  amount      Decimal @db.Decimal(12, 2)
+  currency    String  @default("INR")
+
+  expenseDate DateTime
+  status      ExpenseStatus @default(DRAFT)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  supplier Supplier? @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+  @@index([supplierId])
+  @@index([expenseDate])
+  @@index([category])
+  @@index([status])
+}
+
+model Invoice {
+  id         String  @id @default(uuid())
+  businessId String
+  customerId String?
+  supplierId String?
+  documentId String? @unique
+
+  invoiceNumber String
+  type          InvoiceType
+
+  invoiceDate DateTime
+  dueDate     DateTime?
+
+  currency String @default("INR")
+
+  subtotal       Decimal @db.Decimal(12, 2)
+  taxAmount      Decimal @default(0) @db.Decimal(12, 2)
+  discountAmount Decimal @default(0) @db.Decimal(12, 2)
+  totalAmount    Decimal @db.Decimal(12, 2)
+
+  status        InvoiceStatus @default(DRAFT)
+  paymentStatus PaymentStatus @default(UNPAID)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  supplier Supplier? @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  document Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@unique([businessId, invoiceNumber, type])
+  @@index([businessId])
+  @@index([customerId])
+  @@index([supplierId])
+  @@index([invoiceDate])
+  @@index([dueDate])
+  @@index([status])
+  @@index([paymentStatus])
+}
+
+model InvoiceItem {
+  id           String  @id @default(uuid())
+  invoiceId    String
+  productId    String?
+  taxProfileId String?
+
+  description String
+  quantity    Decimal @db.Decimal(12, 3)
+  unitPrice   Decimal @db.Decimal(12, 2)
+
+  taxAmount      Decimal @default(0) @db.Decimal(12, 2)
+  discountAmount Decimal @default(0) @db.Decimal(12, 2)
+  lineTotal      Decimal @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoice    Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product    Product?    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  taxProfile TaxProfile? @relation(fields: [taxProfileId], references: [id], onDelete: Restrict)
+
+  @@index([invoiceId])
+  @@index([productId])
+  @@index([taxProfileId])
+}
+
+model Payment {
+  id        String @id @default(uuid())
+  invoiceId String
+
+  amount      Decimal       @db.Decimal(12, 2)
+  paymentDate DateTime      @default(now())
+  method      PaymentMethod
+
+  reference String?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([paymentDate])
+}
+
+model Document {
+  id           String @id @default(uuid())
+  businessId   String
+  uploadedById String
+
+  type          DocumentType
+  originalName  String
+  mimeType      String
+  currentStatus ProcessingStatus @default(UPLOADED)
+  reviewStatus  ReviewStatus     @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  uploadedBy User     @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  versions DocumentVersion[]
+  invoice  Invoice?
+  expense  Expense?
+
+  @@index([businessId])
+  @@index([uploadedById])
+  @@index([type])
+  @@index([currentStatus])
+  @@index([reviewStatus])
+}
+
+model DocumentVersion {
+  id         String @id @default(uuid())
+  documentId String
+
+  versionNumber Int
+  fileName      String
+  storageKey    String
+  fileSize      Int?
+  checksum      String?
+
+  processingStatus ProcessingStatus @default(UPLOADED)
+  ocrText          String?
+
+  createdAt DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  extractedFields ExtractedField[]
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@index([processingStatus])
+}
+
+model ExtractedField {
+  id                String @id @default(uuid())
+  documentVersionId String
+
+  fieldName       String
+  fieldValue      String?
+  normalizedValue String?
+  confidence      Decimal? @db.Decimal(5, 4)
+  pageNumber      Int?
+  isValid         Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documentVersion DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+
+  @@index([documentVersionId])
+  @@index([fieldName])
+}
+
+model Conversation {
+  id         String @id @default(uuid())
+  businessId String
+  userId     String
+
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages   Message[]
+  agentTasks AgentTask[]
+
+  @@index([businessId])
+  @@index([userId])
+  @@index([updatedAt])
+}
+
+model Message {
+  id             String @id @default(uuid())
+  conversationId String
+
+  role    String
+  content String
+
+  createdAt DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+model AgentTask {
+  id             String @id @default(uuid())
+  conversationId String
+  businessId     String
+  userId         String
+
+  taskType    String
+  description String
+
+  status String @default("PENDING")
+
+  inputData    Json?
+  outputData   Json?
+  errorMessage String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approvals    Approval[]
+
+  @@index([conversationId])
+  @@index([businessId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}

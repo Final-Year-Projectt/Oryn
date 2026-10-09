@@ -1,0 +1,35 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:validate": "prisma validate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:status": "prisma migrate status",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:crud-test": "tsx src/db/crud-test.ts",
+    "db:connection-test": "tsx src/db/test-connection.ts",
+    "postinstall": "prisma skills sync || exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@prisma/client": "^7.10.0",
+    "dotenv": "^18.0.5",
+    "fastify": "^5.12.5",
+    "prisma": "^7.10.0"
+  },
+  "devDependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@types/node": "^22",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.0.0"
+  }
+}
