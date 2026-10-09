@@ -30,7 +30,7 @@ function Capabilities() {
 
   whileHover={{ y: -6 }}
   transition={{ duration: 0.25 }}
-  className="group rounded-2xl border border-[#D7E7E5] bg-[#F5FBFA] p-6 transition-shadow duration-300 hover:border-[#8ACCC5] hover:shadow-xl hover:shadow-[#0D9488]/10"
+  className="group rounded-2xl border border-[#D7E7E5] !bg-[#F5FBFA] p-6 transition-shadow duration-300 hover:border-[#8ACCC5] hover:shadow-xl hover:shadow-[#0D9488]/10"
 >
   <div className="mb-6 flex items-center justify-between">
     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#DDF4F1] text-[#0D9488]">
@@ -76,7 +76,7 @@ function Capabilities() {
   as={motion.div}
   whileHover={{ y: -6 }}
   transition={{ duration: 0.25 }}
-  className="group rounded-2xl border border-[#D7E7E5] bg-[#F5FBFA] p-6 transition-shadow duration-300 hover:border-[#8ACCC5] hover:shadow-xl hover:shadow-[#0D9488]/10"
+  className="group rounded-2xl border border-[#D7E7E5] !bg-[#F5FBFA] p-6 transition-shadow duration-300 hover:border-[#8ACCC5] hover:shadow-xl hover:shadow-[#0D9488]/10"
 >
   <div className="mb-6 flex items-center justify-between">
     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#DDF4F1] text-[#0D9488]">
@@ -184,7 +184,7 @@ function Capabilities() {
   as={motion.div}
   whileHover={{ y: -6 }}
   transition={{ duration: 0.25 }}
-  className="group rounded-2xl border border-[#D7E7E5] bg-[#F5FBFA] p-6 transition-shadow duration-300 hover:border-[#8ACCC5] hover:shadow-xl hover:shadow-[#0D9488]/10"
+  className="group rounded-2xl border border-[#D7E7E5] !bg-[#F5FBFA] p-6 transition-shadow duration-300 hover:border-[#8ACCC5] hover:shadow-xl hover:shadow-[#0D9488]/10"
 >
   <div className="mb-6 flex items-center justify-between">
     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#DDF4F1] text-[#0D9488]">

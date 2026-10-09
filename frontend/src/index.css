@@ -244,3 +244,8 @@ body {
   line-height: 1.7;
   max-width: 600px;
 }
+
+a {
+  color: teal;
+  text-decoration: underline;
+}
