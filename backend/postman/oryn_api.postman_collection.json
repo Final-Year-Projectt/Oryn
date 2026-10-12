@@ -1,0 +1,582 @@
+{
+  "info": {
+    "_postman_id": "oryn-api-collection-v1",
+    "name": "ORYN API — Full Collection",
+    "description": "Complete Postman collection for the ORYN backend API (Phases 2-5).\n\nImport alongside `oryn_local.postman_environment.json`.\n\nWorkflow order:\n1. Auth → Register\n2. Auth → Login  (token auto-saved to {{token}})\n3. Business → Create Profile\n4. Data → Upload Dataset\n5. Analysis → Run Analysis\n6. Chat → AI Assistant",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [],
+  "item": [
+    {
+      "name": "🔓 Auth",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Verify server is running. No auth required."
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Has token', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.expect(body.data.token).to.be.a('string');",
+                  "  pm.environment.set('token', body.data.token);",
+                  "  pm.environment.set('userId', body.data.user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Johnson\",\n  \"email\": \"alice@oryn.test\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Register a new user. Token is auto-saved to {{token}} on success."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Token received', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.environment.set('token', body.data.token);",
+                  "  pm.environment.set('userId', body.data.user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@oryn.test\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login and receive JWT. Token auto-saved to {{token}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Login — Wrong Password (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('success is false', () => pm.expect(pm.response.json().success).to.be.false);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@oryn.test\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏢 Business",
+      "item": [
+        {
+          "name": "Create Business Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Business created', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.environment.set('businessId', body.data.business.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Alice's Retail Co.\",\n  \"industry\": \"Retail & E-Commerce\",\n  \"businessType\": \"sole_proprietorship\",\n  \"businessSize\": \"small\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/business",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "business"]
+            },
+            "description": "businessType: sole_proprietorship | partnership | corporation | llc | other\nbusinessSize: micro | small | medium | large"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Business Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Business returned', () => pm.expect(pm.response.json().success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/business/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "business", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Business By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/business/{{businessId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "business", "{{businessId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Business — Duplicate (expect 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Duplicate Co.\",\n  \"industry\": \"Tech\",\n  \"businessType\": \"llc\",\n  \"businessSize\": \"medium\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/business",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "business"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Data Upload",
+      "item": [
+        {
+          "name": "Upload CSV Dataset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Rows inserted', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.expect(body.data.insertedCount).to.be.above(0);",
+                  "  console.log('Inserted:', body.data.insertedCount, 'rows');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select your .csv / .xlsx file here"
+                },
+                { "key": "business_id", "value": "{{businessId}}", "type": "text" },
+                { "key": "replace", "value": "false", "type": "text", "description": "Set to 'true' to wipe existing rows before insert" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/data/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "data", "upload"]
+            },
+            "description": "Upload a CSV or Excel file.\n\nUse form-data:\n• file (File) → your .csv / .xlsx\n• business_id (Text) → {{businessId}}\n• replace (Text) → true | false"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload — No File (expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "business_id", "value": "{{businessId}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/data/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "data", "upload"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dataset Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Rows returned', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.total).to.be.above(0);",
+                  "  console.log('Total rows in DB:', body.data.total);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/data/{{businessId}}?limit=50&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "data", "{{businessId}}"],
+              "query": [
+                { "key": "limit", "value": "50" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧠 Analysis",
+      "item": [
+        {
+          "name": "Run Full Analysis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('KPIs returned', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.expect(body.data.kpis).to.be.an('object');",
+                  "  pm.expect(body.data.kpis.financials).to.be.an('object');",
+                  "  if (body.data.problems.length > 0) {",
+                  "    pm.environment.set('problemId', body.data.problems[0].id);",
+                  "  }",
+                  "  console.log('Problems detected:', body.data.problemCount);",
+                  "  console.log('ML online:', body.data.mlStatus.online);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"business_id\": {{businessId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analysis/run",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "analysis", "run"]
+            },
+            "description": "Triggers the full pipeline: KPI computation → ML bridge → problem detection → DB persist.\n\nML service fallbacks ensure this always returns even when the Python service is offline."
+          },
+          "response": []
+        },
+        {
+          "name": "Get KPI Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Financials present', () => {",
+                  "  const kpis = pm.response.json().data.kpis;",
+                  "  pm.expect(kpis.financials.totalRevenue).to.be.a('number');",
+                  "  pm.expect(kpis.financials.profitMargin).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analysis/{{businessId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "analysis", "{{businessId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Problems List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Problems array', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.problems).to.be.an('array');",
+                  "  if (body.data.count > 0) {",
+                  "    pm.environment.set('problemId', body.data.problems[0].id);",
+                  "    console.log('Top problem:', body.data.problems[0].problemType);",
+                  "  }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problems/{{businessId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "problems", "{{businessId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations for Problem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Recommendations array', () => {",
+                  "  pm.expect(pm.response.json().data.recommendations).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recommendations/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "recommendations", "{{problemId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "💬 AI Chat",
+      "item": [
+        {
+          "name": "Chat — Business Question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Reply present', () => {",
+                  "  pm.expect(pm.response.json().data.reply).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What is causing my revenue to decline this quarter?\",\n  \"business_id\": {{businessId}},\n  \"includeKpis\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "chat"]
+            },
+            "description": "AI Assistant endpoint. Set includeKpis:true to enrich the ML context with live KPI data."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Error Cases",
+      "item": [
+        {
+          "name": "No Token (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/business/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "business", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unknown Route (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/nonexistent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "nonexistent"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
