@@ -1,0 +1,11 @@
+# ============================================================
+#  ORYN Backend – .prettierignore
+# ============================================================
+
+node_modules/
+dist/
+build/
+uploads/
+coverage/
+*.min.js
+package-lock.json
