@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Landing Page
 import Landing from "./pages/Landing/Landing";
+import ExploreOryn from "./pages/Landing/ExploreOryn";
 
 // Authentication Pages
 import Login from "./pages/Auth/Login";
@@ -60,8 +61,11 @@ function App() {
             />
             <Route path="/dashboard/history" element={<History />} />
             <Route path="/dashboard/settings" element={<Settings />} />
+            
           </Route>
+          
           </Route>
+          <Route path="/explore" element={<ExploreOryn />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

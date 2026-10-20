@@ -1,16 +1,10 @@
+import { useNavigate } from "react-router-dom";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Card } from "react-bootstrap";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 
 function Hero() {
+const navigate = useNavigate();
 const salesData = [
   { month: "Jan", sales: 72, value: "₹7.2L" },
   { month: "Feb", sales: 86, value: "₹8.6L" },
@@ -46,23 +40,39 @@ const salesData = [
             the right next step.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-4">
-            <motion.button
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.97 }}
-              className="rounded-xl bg-[#0D9488] px-7 py-3.5 font-semibold text-white shadow-lg shadow-teal-900/15 transition-all duration-300 hover:bg-[#0B7F75] hover:shadow-xl"
-            >
-              Get Started →
-            </motion.button>
+ 
+<div className="mt-8 flex flex-wrap items-center gap-4">
+  {/* Primary CTA: Get Started */}
+  <motion.button
+    type="button"
+    onClick={() => navigate("/signup")}
+    whileHover={{ y: -3, scale: 1.02 }}
+    whileTap={{ scale: 0.97 }}
+    className="group inline-flex min-h-14 items-center justify-center gap-2.5 rounded-xl bg-[#0D9488] px-7 py-4 text-sm font-bold tracking-wide text-white shadow-[0_10px_24px_-10px_rgba(13,148,136,0.65)] transition-all duration-300 hover:bg-[#0B7F75] hover:shadow-[0_16px_30px_-10px_rgba(13,148,136,0.55)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0D9488]/30 sm:text-base"
+  >
+    Get started
+    <ArrowRight
+      size={19}
+      className="transition-transform duration-300 group-hover:translate-x-1"
+    />
+  </motion.button>
 
-            <motion.button
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.97 }}
-              className="rounded-xl border border-[#9ACDC8] bg-white/50 px-7 py-3.5 font-semibold text-[#0D9488] backdrop-blur-sm transition-all duration-300 hover:border-[#0D9488] hover:bg-white"
-            >
-              Explore ORYN
-            </motion.button>
-          </div>
+  {/* Secondary CTA: Explore ORYN */}
+  <motion.button
+    type="button"
+    onClick={() => navigate("/explore")}
+    whileHover={{ y: -3, scale: 1.02 }}
+    whileTap={{ scale: 0.97 }}
+    className="group inline-flex min-h-14 items-center justify-center gap-2.5 rounded-xl border border-[#9ACDC8] bg-white/70 px-7 py-4 text-sm font-bold tracking-wide text-[#0D7069] shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-[#0D9488] hover:bg-white hover:shadow-lg hover:shadow-teal-900/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0D9488]/20 sm:text-base"
+  >
+    Explore ORYN
+    <ArrowUpRight
+      size={19}
+      className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+    />
+  </motion.button>
+</div>
+
         </motion.div>
 
         {/* RIGHT DASHBOARD */}

@@ -55,7 +55,7 @@ function Footer() {
             </p>
 
             <a
-              href="/login"
+              href="/explore"
               className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#5CCBD0] !no-underline transition-colors hover:text-white"
             >
               Explore ORYN
