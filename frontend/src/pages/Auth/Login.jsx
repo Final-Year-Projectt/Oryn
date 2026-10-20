@@ -1,3 +1,5 @@
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 import { useState } from "react";
 import { LogIn } from "lucide-react";
@@ -13,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import EventIdcard from "./EventIdcard";
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,6 +35,8 @@ const itemVariants = {
 };
 
 export default function Login() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -39,11 +44,17 @@ export default function Login() {
   const [message, setMessage] = useState("");
 
   function handleSubmit(event) {
-    event.preventDefault();
-    setMessage(
-      "Login UI is ready. Authentication will work once the backend is connected.",
-    );
+  event.preventDefault();
+  setMessage("");
+
+  const result = login(email, password);
+
+  if (result.success) {
+    navigate("/dashboard", { replace: true });
+  } else {
+    setMessage(result.message);
   }
+}
 
   function handleGoogleLogin() {
     setMessage(
