@@ -6,7 +6,7 @@ import Landing from "./pages/Landing/Landing";
 import ExploreOryn from "./pages/Landing/ExploreOryn";
 
 // Authentication Pages
-import Login from "./pages/Auth/Login";
+import SignIn from "./pages/Auth/SignIn";
 import Signup from "./pages/Auth/Signup";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
@@ -39,7 +39,7 @@ function App() {
           <Route path="/explore" element={<ExploreOryn />} />
 
           {/* Authentication */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/SignIn" element={<SignIn />} />
           <Route path="/signup" element={<Signup />} />
           <Route
             path="/forgot-password"

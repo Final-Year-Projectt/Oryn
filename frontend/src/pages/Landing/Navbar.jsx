@@ -63,11 +63,11 @@ function Navbar() {
   How It Works
 </Nav.Link>
           <Nav.Link
-  href="/login"
+  href="/SignIn"
   className="oryn-nav-link border border-secondary rounded px-3"
   onClick={() => setExpanded(false)}
 >
-  Login
+  SignIn
 </Nav.Link>
           </Nav>
         </BsNavbar.Collapse>

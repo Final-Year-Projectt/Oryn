@@ -133,7 +133,7 @@ className={({ isActive }) =>
   <LogOut size={19} className="shrink-0" />
 
   <span className={isCollapsed ? "lg:hidden" : ""}>
-    Log Out
+      Sign Out
   </span>
 </button>
 
