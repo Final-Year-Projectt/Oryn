@@ -1,7 +1,7 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Landing Page
+// Landing Pages
 import Landing from "./pages/Landing/Landing";
 import ExploreOryn from "./pages/Landing/ExploreOryn";
 
@@ -19,9 +19,10 @@ import Validation from "./pages/Dashboard/Validation";
 import Datasets from "./pages/Dashboard/Datasets";
 import Problems from "./pages/Dashboard/Problems";
 import Recommendations from "./pages/Dashboard/Recommendations";
-import AIAssistant from "./pages/Dashboard/AIAssistant";
 import History from "./pages/Dashboard/History";
 import Settings from "./pages/Dashboard/Settings";
+import Profile from "./pages/Dashboard/Profile";
+import Notifications from "./pages/Dashboard/Notifications";
 import DashboardLayout from "./pages/Dashboard/DashboardLayout";
 
 // Authentication Protection
@@ -33,39 +34,49 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Landing Page */}
+          {/* Landing Pages */}
           <Route path="/" element={<Landing />} />
+          <Route path="/explore" element={<ExploreOryn />} />
 
           {/* Authentication */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/reset-success" element={<ResetSuccess />} />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
+          />
+          <Route
+            path="/reset-password"
+            element={<ResetPassword />}
+          />
+          <Route
+            path="/reset-success"
+            element={<ResetSuccess />}
+          />
 
           {/* Protected Dashboard Routes */}
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/upload" element={<UploadData />} />
-            <Route path="/dashboard/validation" element={<Validation />} />
-            <Route path="/dashboard/datasets" element={<Datasets />} />
-            <Route path="/dashboard/problems" element={<Problems />} />
-            <Route
-              path="/dashboard/recommendations"
-              element={<Recommendations />}
-            />
-            <Route
-              path="/dashboard/assistant"
-              element={<AIAssistant />}
-            />
-            <Route path="/dashboard/history" element={<History />} />
-            <Route path="/dashboard/settings" element={<Settings />} />
-            
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/upload" element={<UploadData />} />
+              <Route path="/dashboard/validation" element={<Validation />} />
+              <Route path="/dashboard/datasets" element={<Datasets />} />
+              <Route path="/dashboard/problems" element={<Problems />} />
+
+              <Route
+                path="/dashboard/recommendations"
+                element={<Recommendations />}
+              />
+
+              <Route path="/dashboard/history" element={<History />} />
+              <Route path="/dashboard/settings" element={<Settings />} />
+              <Route path="/dashboard/profile" element={<Profile />} />
+              <Route
+                path="/dashboard/notifications"
+                element={<Notifications />}
+              />
+            </Route>
           </Route>
-          
-          </Route>
-          <Route path="/explore" element={<ExploreOryn />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
